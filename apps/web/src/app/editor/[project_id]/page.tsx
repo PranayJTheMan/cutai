@@ -10,6 +10,7 @@ import { AssetsPanel } from "@/components/editor/panels/assets";
 import { PropertiesPanel } from "@/components/editor/panels/properties";
 import { Timeline } from "@/components/editor/panels/timeline";
 import { PreviewPanel } from "@/components/editor/panels/preview";
+import { AIChatPanel } from "@/components/editor/panels/ai-chat/ai-chat-panel";
 import { EditorHeader } from "@/components/editor/editor-header";
 import { EditorProvider } from "@/components/providers/editor-provider";
 import { Onboarding } from "@/components/editor/onboarding";
@@ -123,6 +124,17 @@ function EditorLayout() {
 						className="min-w-0"
 					>
 						<PropertiesPanel />
+					</ResizablePanel>
+
+					<ResizableHandle withHandle />
+
+					<ResizablePanel
+						defaultSize={20}
+						minSize={15}
+						maxSize={40}
+						className="min-w-0"
+					>
+						<AIChatPanel />
 					</ResizablePanel>
 				</ResizablePanelGroup>
 			</ResizablePanel>
