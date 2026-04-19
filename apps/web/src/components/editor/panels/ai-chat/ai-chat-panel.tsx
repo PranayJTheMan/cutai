@@ -1,7 +1,6 @@
 'use client'
 
 import React, { useState, useRef, useEffect } from 'react'
-import { GoogleGenerativeAI } from '@google/generative-ai'
 
 interface ChatMessage {
   id: string
@@ -46,18 +45,34 @@ export function AIChatPanel() {
     setLoading(true)
 
     try {
-      const genAI = new GoogleGenerativeAI(process.env.NEXT_PUBLIC_GEMINI_API_KEY || '')
-      const model = genAI.getGenerativeModel({ model: 'gemini-2.5-pro' })
+      const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${process.env.NEXT_PUBLIC_OPENROUTER_KEY}`,
+          'HTTP-Referer': window.location.href,
+          'X-Title': 'CutAI',
+        },
+        body: JSON.stringify({
+          model: 'google/gemini-2.5-pro',
+          messages: [
+            {
+              role: 'user',
+              content: `You are a video editing assistant. User request: "${input}". Respond with a brief, actionable description of edits you would make. Keep it under 100 words.`,
+            },
+          ],
+          temperature: 0.7,
+          max_tokens: 200,
+        }),
+      })
 
-      const response = await model.generateContent(
-        `You are a video editing assistant. User request: "${input}". 
-         Respond with a brief, actionable description of edits you would make. Keep it under 100 words.`
-      )
+      const data = await response.json()
+      const assistantText = data.choices?.[0]?.message?.content || 'No response'
 
       const assistantMessage: ChatMessage = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
-        content: response.response.text(),
+        content: assistantText,
         timestamp: new Date(),
       }
 
@@ -66,7 +81,7 @@ export function AIChatPanel() {
       const errorMessage: ChatMessage = {
         id: (Date.now() + 2).toString(),
         role: 'assistant',
-        content: '❌ Error: Make sure to set NEXT_PUBLIC_GEMINI_API_KEY',
+        content: '❌ Error: Make sure to set NEXT_PUBLIC_OPENROUTER_KEY in .env.local',
         timestamp: new Date(),
       }
       setMessages((prev) => [...prev, errorMessage])
